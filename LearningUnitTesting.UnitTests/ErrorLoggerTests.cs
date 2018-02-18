@@ -1,5 +1,7 @@
-﻿using LearningUnitTesting.Fundamentals;
+﻿using System;
+using LearningUnitTesting.Fundamentals;
 using NUnit.Framework;
+using Remotion.Linq.Clauses.ResultOperators;
 
 namespace LearningUnitTesting.UnitTests
 {
@@ -29,6 +31,20 @@ namespace LearningUnitTesting.UnitTests
           
             Assert.That(()=> logger.Log(error), Throws.ArgumentNullException);
 //          Assert.That(()=> logger.Log(error), Throws.TypeOf<>()); //I can use custom exeptions
+        }
+
+        [Test]
+        public void Log_ValidError_RaiseErrorLogEvent()
+        {
+            var logger = new ErrorLogger();
+
+            var id = Guid.Empty;
+
+            logger.ErrorLogged += (sender, args) => { id = args; };
+            
+            logger.Log("a");
+            
+            Assert.That(id, Is.Not.EqualTo(Guid.Empty));
         }
     }
 }
