@@ -24,7 +24,12 @@ namespace LearningUnitTesting.UnitTests
         [Test]
         public void GetCustomer_IdIsNotZero_ReturnsOk()
         {
+            var controller = new CustomerController();
+
+            var result = controller.GetCustomer(1); 
             
+            //NotFound object
+            Assert.That(result, Is.TypeOf<Ok>());
         }
     
     }
