@@ -1,4 +1,5 @@
-﻿using LearningUnitTesting.Fundamentals;
+﻿using System.Linq;
+using LearningUnitTesting.Fundamentals;
 using NUnit.Framework;
 
 namespace LearningUnitTesting.UnitTests
@@ -37,6 +38,23 @@ namespace LearningUnitTesting.UnitTests
             var result = _math.Max(a, b);
             
             Assert.That(result,Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public void GetOddNumbers_LimitIsGteaterThanZero_ReturnsOddNumbersUpToLimit()
+        {
+           var result = _math.GetOddNumbers(5);
+            
+            
+            Assert.That(result,Is.Not.Empty);            //Use this assertions 
+            Assert.That(result.Count(), Is.EqualTo(3)); //Or this
+
+            Assert.That(result, Does.Contain(1));
+            Assert.That(result, Does.Contain(3));
+            Assert.That(result, Does.Contain(5));
+            
+            Assert.That(result, Is.EquivalentTo(new [] {1,3,5}));
+            
         }
         
 //        [Test]
