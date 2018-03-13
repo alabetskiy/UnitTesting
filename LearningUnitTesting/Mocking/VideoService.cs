@@ -13,12 +13,13 @@ namespace LearningUnitTesting.Mocking
             public IFileReader _fileReader;
 
 
-            public VideoService()
+            public VideoService(IFileReader fileReader = null)
             {
-                _fileReader = new FileReader();
+                _fileReader = fileReader ?? new FileReader(); //if fileReader is null instantiate FileReader()
             }
+            
             public string ReadVideoTitle()
-            {
+            {   
                 var str = _fileReader.Read("video.txt");
                 
                 var video = JsonConvert.DeserializeObject<Video>(str);
