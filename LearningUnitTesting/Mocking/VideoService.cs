@@ -11,11 +11,12 @@ namespace LearningUnitTesting.Mocking
         public class VideoService
         {
             public IFileReader _fileReader;
+            public IVideoRepository _videoRepo;
 
-
-            public VideoService(IFileReader fileReader = null)
+        public VideoService(IFileReader fileReader = null, IVideoRepository videoRepo = null)
             {
                 _fileReader = fileReader ?? new FileReader(); //if fileReader is null instantiate FileReader()
+                _videoRepo = videoRepo ?? new VideoRepository();
             }
             
             public string ReadVideoTitle()
@@ -28,24 +29,18 @@ namespace LearningUnitTesting.Mocking
                 return video.Title;
             }
 
-            public string GetUnprocessedVideosAsCsv()
-            {
-                var videoIds = new List<int>();
-            
-                using (var context = new VideoContext())
-                {
-                    var videos = 
-                        (from video in context.Videos
-                            where !video.IsProcessed
-                            select video).ToList();
-                
-                    foreach (var v in videos)
-                        videoIds.Add(v.Id);
+        public string GetUnprocessedVideosAsCsv()
+        {
+            var videoIds = new List<int>();
 
-                    return String.Join(",", videoIds);
-                }
-            }
+            var videos = _videoRepo.GetUnprocessedVideos();
+            foreach (var v in videos)
+                videoIds.Add(v.Id);
+
+            return String.Join(",", videoIds);
+
         }
+    }
 
         public class Video
         {
