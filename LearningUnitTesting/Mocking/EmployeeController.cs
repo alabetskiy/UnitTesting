@@ -5,18 +5,18 @@ namespace LearningUnitTesting.Mocking
 {
     public class EmployeeController
     {
-        private EmployeeContext _db;
+        private readonly IEmployeeStorage _employeeStorage;
 
-        public EmployeeController()
+        public EmployeeController(IEmployeeStorage employeeStorage)
         {
-            _db = new EmployeeContext();
+            _employeeStorage = employeeStorage;
         }
+
+        public IEmployeeStorage EmployeeStorage { get; }
 
         public ActionResult DeleteEmployee(int id)
         {
-            var employee = _db.Employees.Find(id);
-            _db.Employees.Remove(employee);
-            _db.SaveChanges();
+            _employeeStorage.DeleteEmployee(id);
             return RedirectToAction("Employees");
         }
 
