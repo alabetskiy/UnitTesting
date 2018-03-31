@@ -12,7 +12,7 @@ namespace LearningUnitTesting.UnitTests.Mocking
     public class BookingHelperTests
     {
         [Test]
-        public void OverlappingBookingsExist_BookingStartsAndFinishesBeforeAnExistingBooking()
+        public void OverlappingBookingsExist_BookingStartsAndFinishesBeforeAnExistingBooking_ReturnEmptyString()
         {
             //Arrange
             var repository = new Mock<IBookingRepository>();
@@ -38,6 +38,36 @@ namespace LearningUnitTesting.UnitTests.Mocking
                 }, repository.Object);
 
             Assert.That(result, Is.Empty);
+        }
+
+
+        [Test]
+        public void OverlappingBookingsExist_BookingStartsBeforeAndFinishesInTheMiddleOfAnExistingBooking_ReturnExistingBookingReference()
+        {
+            //Arrange
+            var repository = new Mock<IBookingRepository>();
+            repository.Setup(r => r.GetActiveBookings(1)).Returns(new List<Booking> {
+                new Booking
+                {
+                    Id = 2,
+                    ArrivalDate =  new DateTime(2017, 1, 15, 14, 0, 0 ),
+                    DepartureDate = new DateTime(2017, 1, 20, 10, 0, 0),
+                    Reference = "a"
+                }
+
+            }.AsQueryable());
+
+            //Act
+            var result = BookingHelper.OverlappingBookingsExist(
+                 new Booking
+                 {
+                     Id = 1,
+                     ArrivalDate = new DateTime(2017, 1, 15, 14, 0, 0),
+                     DepartureDate = new DateTime(2017, 1, 16, 10, 0, 0),
+
+                 }, repository.Object);
+
+            Assert.That(result, Is.EqualTo("a"));
         }
     }
 }
