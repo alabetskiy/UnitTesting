@@ -11,32 +11,49 @@ namespace LearningUnitTesting.UnitTests.Mocking
     [TestFixture]
    public class HouseKeeperServiceTests
     {
-        [Test]
-        public void SendStatementEmails_WhenCalled_GenerateStatements()
+        private HousekeeperService _service;
+        private Mock<IStatementGenerator> _statementGenerator;
+        private Mock<IEmailSender> _emailSender;
+        private Mock<IXtraMessageBox> _messageBox;
+        private DateTime _statementDate = new DateTime(2018, 06, 17);
+        private Housekeeper _houseKeeper;
+
+        [SetUp]
+        public void SetUp()
         {
+            _houseKeeper = new Housekeeper { Email = "a", FullName = "b", Oid = 1, StatementEmailBody = "c" };
+
             //First dependence for HouseKeeperService class
             var unitOfWork = new Mock<IUnitOfWork>();
+
             unitOfWork.Setup(uow => uow.Query<Housekeeper>()).Returns(new List<Housekeeper>
             {
-                new Housekeeper { Email = "a", FullName = "b", Oid = 1, StatementEmailBody = "c" }
+                _houseKeeper
             }.AsQueryable());
 
             //Second dependence for HouseKeeperService class
-            var statementGenerator = new Mock<IStatementGenerator>();
+            _statementGenerator = new Mock<IStatementGenerator>();
 
             //Third dependence for HouseKeeperService class
-            var emailSender = new Mock<IEmailSender>();
+            _emailSender = new Mock<IEmailSender>();
 
             //Fourth dependence for HouseKeeperService class
-            var messageBox = new Mock<IXtraMessageBox>();
+            _messageBox = new Mock<IXtraMessageBox>();
 
-            var service = new HousekeeperService(unitOfWork.Object,
-                statementGenerator.Object, emailSender.Object, messageBox.Object);
+            _service = new HousekeeperService(unitOfWork.Object,
+                _statementGenerator.Object, _emailSender.Object, _messageBox.Object);
+
+        }
+
+
+        [Test]
+        public void SendStatementEmails_WhenCalled_GenerateStatements()
+        {
 
             //ACT
-            service.SendStatementEmails(new DateTime(2017, 1, 1));
+            _service.SendStatementEmails(_statementDate);
 
-            statementGenerator.Verify(sg => sg.SaveStatement(1, "b", (new DateTime(2017, 1, 1))));
+            _statementGenerator.Verify(sg => sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, _statementDate));
 
         }
     }
