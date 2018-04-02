@@ -17,6 +17,7 @@ namespace LearningUnitTesting.UnitTests.Mocking
         private Mock<IXtraMessageBox> _messageBox;
         private DateTime _statementDate = new DateTime(2018, 06, 17);
         private Housekeeper _houseKeeper;
+        private readonly string _statementFileName = "filename";
 
         [SetUp]
         public void SetUp()
@@ -90,6 +91,103 @@ namespace LearningUnitTesting.UnitTests.Mocking
 
             _statementGenerator.Verify(sg => sg.SaveStatement(
                 _houseKeeper.Oid, _houseKeeper.FullName, _statementDate), Times.Never); //Times.Never means that SaveStatement should never be called
+
+        }
+
+
+        [Test]
+        public void SendStatementEmails_WhenCalled_EmailTheStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, _statementDate))
+                .Returns(_statementFileName); 
+
+            //ACT
+            _service.SendStatementEmails(_statementDate);
+
+            _emailSender.Verify(es => es.EmailFile(
+                _houseKeeper.Email,
+                _houseKeeper.StatementEmailBody,
+                _statementFileName,
+                It.IsAny<string>()));
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsNull_ShouldNotEmailTheStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(
+                    _houseKeeper.Oid,
+                    _houseKeeper.FullName,
+                    _statementDate))
+                .Returns(() => null);
+
+            //ACT
+            _service.SendStatementEmails(_statementDate);
+
+            _emailSender.Verify(es => es.EmailFile(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsEmptyString_ShouldNotEmailTheStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(
+                    _houseKeeper.Oid,
+                    _houseKeeper.FullName,
+                    _statementDate))
+                .Returns("");
+
+            //ACT
+            _service.SendStatementEmails(_statementDate);
+
+            _emailSender.Verify(es => es.EmailFile(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_StatementFileNameIsWhiteSpace_ShouldNotEmailTheStatement()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(
+                    _houseKeeper.Oid,
+                    _houseKeeper.FullName,
+                    _statementDate))
+                .Returns(" ");
+
+            //ACT
+            _service.SendStatementEmails(_statementDate);
+
+            _emailSender.Verify(es => es.EmailFile(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Test]
+        public void SendStatementEmails_EmailSendingFails_DisplayAMessageBox()
+        {
+            _statementGenerator
+                .Setup(sg => sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, _statementDate))
+                .Returns(_statementFileName);
+
+            _emailSender.Setup(es => es.EmailFile(It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>(),It.IsAny<string>())).Throws<Exception>();
+
+            _service.SendStatementEmails(_statementDate);
+
+            _messageBox.Verify(mb => mb.Show(It.IsAny<string>(), It.IsAny<string>(), MessageBoxButtons.OK));
 
         }
     }

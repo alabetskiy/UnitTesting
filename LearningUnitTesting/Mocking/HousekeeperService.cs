@@ -21,7 +21,6 @@ namespace LearningUnitTesting.Mocking
             _messageBox = messageBox;
         }
 
-        public IEmailSender EmailSender { get; }
 
         public void SendStatementEmails(DateTime statementDate)
         {
@@ -45,9 +44,9 @@ namespace LearningUnitTesting.Mocking
                     _emailSender.EmailFile(emailAddress, emailBody, statementFilename,
                         string.Format("Sandpiper Statement {0:yyyy-MM} {1}", statementDate, housekeeper.FullName));
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _messageBox.Show(e.Message, string.Format("Email failure: {0}", emailAddress),
+                    _messageBox.Show(ex.Message, string.Format("Email failure: {0}", emailAddress),
                         MessageBoxButtons.OK);
                 }
             }
