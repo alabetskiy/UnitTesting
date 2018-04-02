@@ -29,7 +29,7 @@ namespace LearningUnitTesting.Mocking
 
             foreach (var housekeeper in housekeepers)
             {
-                if (housekeeper.Email == null)
+                if (string.IsNullOrWhiteSpace(housekeeper.Email))
                     continue;
 
                 var statementFilename = _statementGenerator.SaveStatement(housekeeper.Oid, housekeeper.FullName, statementDate);
