@@ -56,5 +56,17 @@ namespace LearningUnitTesting.UnitTests.Mocking
             _statementGenerator.Verify(sg => sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, _statementDate));
 
         }
+
+        [Test]
+        public void SendStatementEmails_HouseKeeperEmailIsNull_ShouldNotGenerateStatement()
+        {
+            _houseKeeper.Email = null;
+            //ACT
+            _service.SendStatementEmails(_statementDate);
+
+            _statementGenerator.Verify(sg => sg.SaveStatement(
+                _houseKeeper.Oid, _houseKeeper.FullName, _statementDate), Times.Never); //Times.Never means that SaveStatement should never be called
+
+        }
     }
 }
